@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tokyo Math Mystery Codebreaker</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    tokyo: {
+                        bg: '#0a0d18',
+                        panel: '#12192e',
+                        card: '#18223c',
+                        border: '#2e3f6e',
+                        pink: '#ff2a85',
+                        cyan: '#00f3ff',
+                        purple: '#a855f7',
+                        gold: '#f4c95d',
+                        green: '#00f5d4',
+                        cream: '#fff8e8',
+                        redAlert: '#ef4444'
+                    }
+                },
+                fontFamily: {
+                    sans: ['Inter', 'sans-serif'],
+                    mono: ['Fira Code', 'Courier New', 'monospace']
+                }
+            }
+        }
+    }
+</script>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fira+Code:wght@500;700&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --navy: #0a0d18;
+        --panel: #12192e;
+        --gold: #f4c95d;
+        --pink: #ff2a85;
+        --cyan: #00f3ff;
+        --purple: #a855f7;
+        --cream: #fff8e8;
+        --mint: #00f5d4;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--cream);
+        background: radial-gradient(circle at 12% 10%, #20335e 0, transparent 28%), 
+                    radial-gradient(circle at 88% 25%, #2a1b4e 0, transparent 30%), 
+                    radial-gradient(circle at 50% 80%, #0d2a45 0, transparent 35%),
+                    linear-gradient(135deg, #070913, #11182d 55%, #070913);
+        background-attachment: fixed;
+        overflow-x: hidden;
+    }
+
+    .panel-card {
+        border: 1px solid #334677;
+        border-radius: 20px;
+        background: rgba(18, 25, 46, 0.92);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        backdrop-filter: blur(8px);
+    }
+
+    .btn-action {
+        border: 1px solid #485c8a;
+        background: #1c2847;
+        color: white;
+        border-radius: 12px;
+        padding: 9px 14px;
+        font-weight: 700;
+        transition: transform .12s, background .12s, box-shadow .12s;
+    }
+    .btn-action:hover {
+        transform: translateY(-2px);
+        background: #273863;
+        box-shadow: 0 4px 12px rgba(0,243,255,0.25);
+    }
+    .btn-pink {
+        background: linear-gradient(135deg, #ff2a85, #d91b6c);
+        color: white;
+        border-color: #ff66a8;
+        box-shadow: 0 0 12px rgba(255,42,133,0.4);
+    }
+    .btn-pink:hover {
+        background: linear-gradient(135deg, #ff4797, #f02477);
+        box-shadow: 0 0 18px rgba(255,42,133,0.6);
+    }
+    .btn-cyan {
+        background: linear-gradient(135deg, #00f3ff, #00b4d8);
+        color: #070913;
+        border-color: #70f8ff;
+        font-weight: 800;
+        box-shadow: 0 0 12px rgba(0,243,255,0.4);
+    }
+    .btn-cyan:hover {
+        background: linear-gradient(135deg, #33f5ff, #00c6eb);
+        box-shadow: 0 0 18px rgba(0,243,255,0.6);
+    }
+
+    .glow-pink { text-shadow: 0 0 10px rgba(255, 42, 133, 0.7), 0 0 20px rgba(255, 42, 133, 0.4); }
+    .glow-cyan { text-shadow: 0 0 10px rgba(0, 243, 255, 0.7), 0 0 20px rgba(0, 243, 255, 0.4); }
+
+    .box-glow-pink { box-shadow: 0 0 20px rgba(255, 42, 133, 0.3), inset 0 0 10px rgba(255, 42, 133, 0.15); }
+    .box-glow-cyan { box-shadow: 0 0 20px rgba(0, 243, 255, 0.3), inset 0 0 10px rgba(0, 243, 255, 0.15); }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-8px); }
+        40%, 80% { transform: translateX(8px); }
+    }
+    .animate-shake { animation: shake 0.45s ease-in-out; }
+
+    .blank-line {
+        display: inline-block;
+        border-bottom: 4px solid var(--pink);
+        box-shadow: 0 4px 12px rgba(255, 42, 133, 0.6);
+    }
+
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d {
+        transform-style: preserve-3d;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .flip-card-inner.flipped { transform: rotateY(180deg); }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+
+    .badge-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+    }
+    .badge-item {
+        min-height: 140px;
+        padding: 12px 8px;
+        border: 1px solid #3d4f7c;
+        border-radius: 16px;
+        text-align: center;
+        background: #141f38;
+        transition: all 0.2s;
+    }
+    .badge-item.unlocked {
+        border-color: #f4c95d;
+        background: linear-gradient(145deg, #1f2f54, #121c33);
+        box-shadow: 0 0 15px rgba(244, 201, 93, 0.25);
+    }
+    .badge-item.locked { opacity: 0.55; filter: grayscale(1); }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0d18; }
+    ::-webkit-scrollbar-thumb { background: #2e3f6e; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #ff2a85; }
+
+    /* PRINT STYLES - Print Badge Section Only */
+    @media print {
+        body {
+            background: #ffffff !important;
+            color: #000000 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* Hide everything by default when printing */
+        body * {
+            visibility: hidden;
+        }
+
+        /* Show only badge section and its contents */
+        #badgeSection, #badgeSection * {
+            visibility: visible;
+        }
+
+        /* Position badge section at top of print page */
+        #badgeSection {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            background: #ffffff !important;
+            border: 2px solid #000000 !important;
+            color: #000000 !important;
+            box-shadow: none !important;
+            padding: 20px !important;
+            border-radius: 12px !important;
+        }
+
+        #badgeSection h2 {
+            color: #000000 !important;
+        }
+
+        #badgeProgressText {
+            color: #333333 !important;
+        }
+
+        .badge-item {
+            border: 1px solid #000000 !important;
+            background: #f8fafc !important;
+            color: #000000 !important;
+            filter: none !important;
+            opacity: 1 !important;
+        }
+
+        .badge-item .text-tokyo-gold,
+        .badge-item .text-slate-400,
+        .badge-item .text-slate-300 {
+            color: #000000 !important;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-tokyo-pink selection:text-white">
+
+    <!-- Ambient Canvas Particles -->
+    <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0 no-print"></canvas>
+
+    <!-- FLOATING INVALID WARNING TOAST -->
+    <div id="warningToast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-4 no-print">
+        <div class="bg-red-600/95 text-white border-2 border-red-400 font-mono text-xs sm:text-sm px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 box-glow-pink">
+            <span class="text-xl">🛑</span>
+            <div>
+                <p class="font-bold" id="toastTitle">Sila selesaikan soalan matematik terlebih dahulu!</p>
+                <p class="text-[11px] text-red-200" id="toastSub">Selesaikan nilai anu sebelum memasukkan huruf.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app" class="relative z-10 flex flex-col min-h-screen max-w-6xl mx-auto px-4 py-4 w-full">
+
+        <!-- HEADER NAVBAR -->
+        <header class="flex flex-wrap items-center justify-between gap-4 mb-6 no-print">
+            <div class="flex items-center gap-3">
+                <div class="text-4xl filter drop-shadow-[0_0_10px_#ff2a85]">🕵️‍♂️</div>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 id="txtMainTitle" class="text-2xl sm:text-3xl font-black uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-tokyo-gold via-tokyo-pink to-tokyo-cyan glow-pink">
+                            Penyahkod Rahsia Matematik
+                        </h1>
+                        <span class="text-xs font-bold text-tokyo-green bg-tokyo-green/10 border border-tokyo-green/30 px-2.5 py-0.5 rounded-md" id="authorTag">
+                            Dibina oleh DAPHNE TANG LI YUN
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-300 font-mono mt-0.5" id="txtMainSub">Selesaikan nilai anu operasi darab untuk memecahkan kod rahsia!</p>
+                </div>
+            </div>
+
+            <!-- Toolbar Controls -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <label class="flex items-center gap-2 text-xs font-extrabold text-slate-200 bg-tokyo-card border border-tokyo-border px-3 py-2 rounded-xl">
+                    <span id="txtLangLabel">🌐 Bahasa:</span>
+                    <select id="languageSelect" onchange="switchLanguage(this.value)" class="bg-tokyo-bg text-white rounded-lg px-2 py-1 border border-tokyo-border focus:outline-none">
+                        <option value="bm" selected>BM · Bahasa Melayu</option>
+                        <option value="en">ENG · British English</option>
+                    </select>
+                </label>
+
+                <button id="toggleCipherBtn" onclick="openCipherDrawer()" class="btn-action btn-cyan text-xs flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
+                    <span id="txtCipherBtn">Carta Kod (A=1)</span>
+                </button>
+
+                <button id="soundToggleBtn" onclick="toggleSound()" title="Toggle Sound" class="btn-action p-2 text-slate-300">
+                    <svg id="soundOnIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"></path></svg>
+                    <svg id="soundOffIcon" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" stroke-width="2"/><line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" stroke-width="2"/></svg>
+                </button>
+
+                <button id="resetBtn" onclick="resetGame()" class="btn-action bg-red-500/20 border-red-500/40 text-red-300 hover:bg-red-500/30 text-xs">
+                    <span id="txtResetBtn">Tetapkan Semula ↻</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="space-y-6 flex-grow">
+
+            <!-- SINGLE LANGUAGE INSTRUCTION BANNER -->
+            <section class="panel-card p-5 border-2 border-tokyo-pink/60 box-glow-pink space-y-3 no-print">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-b border-tokyo-border/60 pb-3">
+                    <div>
+                        <span class="inline-block bg-tokyo-pink text-white text-[11px] font-extrabold uppercase px-3 py-1 rounded-full tracking-wider shadow mb-1" id="txtCipherRuleTag">
+                            📌 PERATURAN KOD HURUF
+                        </span>
+                        <p class="text-xs sm:text-sm font-bold text-tokyo-gold font-mono" id="txtCipherRuleDetail">
+                            A = 1, B = 2, C = 3, D = 4, E = 5, F = 6 ... sehingga Z = 26
+                        </p>
+                    </div>
+
+                    <button onclick="openCipherDrawer()" class="btn-action btn-cyan text-xs shrink-0 flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        <span id="txtBannerCipher">Lihat Carta Kod Huruf</span>
+                    </button>
+                </div>
+
+                <!-- ENFORCED TWO-STEP RULE WARNING -->
+                <div class="bg-red-950/40 border border-red-500/60 rounded-xl p-3 flex items-start space-x-3 text-xs sm:text-sm">
+                    <span class="text-xl shrink-0">⚠️</span>
+                    <div>
+                        <p class="font-bold text-red-400 uppercase tracking-wide text-[11px]" id="txtRuleTitle">PERATURAN WAJIB DETEKTIF:</p>
+                        <p class="text-slate-200 mt-0.5" id="txtRuleBody">
+                            Anda mesti menyelesaikan soalan nilai anu matematik terlebih dahulu sebelum memasukkan huruf! Meneka huruf secara terus tidak dibenarkan.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MAIN WORD DECRYPTION BOARD -->
+            <section class="panel-card p-6 sm:p-8 relative overflow-hidden box-glow-cyan no-print">
+                <div class="text-center max-w-xl mx-auto mb-6">
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-mono font-bold bg-tokyo-purple/30 text-tokyo-cyan border border-tokyo-purple/50 mb-2 uppercase tracking-widest" id="txtCaseTitle">
+                        🗂️ KES PERAKAN RAHSIA
+                    </span>
+                    <h2 class="text-xl sm:text-2xl font-black text-white" id="txtMainHeading">NYAHKOD KOD DESTINASI RAHSIA 5 HURUF</h2>
+                    <p class="text-xs text-slate-300 mt-1" id="txtSubHeading">Tekan "Lihat Soalan" di bawah setiap petak untuk menyelesaikan nilai anu dahulu!</p>
+                </div>
+
+                <!-- 5 BLANK LINE SLOTS GRID -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-6 my-6 max-w-4xl mx-auto">
+                    
+                    <!-- SLOT 0 -->
+                    <div class="flex flex-col items-center group">
+                        <span class="text-[11px] font-mono font-bold text-slate-400 mb-2" id="labelSlot0">Petak #1</span>
+                        <div onclick="handleDirectSlotClick(0)" id="slotCard-0" class="word-slot perspective-1000 w-20 sm:w-24 h-24 sm:h-28 cursor-pointer">
+                            <div class="flip-card-inner relative w-full h-full transform-style-3d duration-500">
+                                <div id="slotFront-0" class="absolute inset-0 bg-tokyo-bg/90 border-2 border-tokyo-border rounded-2xl flex flex-col items-center justify-center backface-hidden shadow-inner group-hover:border-tokyo-pink transition">
+                                    <span class="text-2xl font-black text-slate-500">?</span>
+                                    <div class="w-12 h-1 mt-2 bg-tokyo-pink rounded-full blank-line"></div>
+                                </div>
+                                <div id="slotBack-0" class="absolute inset-0 bg-gradient-to-b from-tokyo-pink/40 to-purple-900/90 border-2 border-tokyo-pink rounded-2xl flex flex-col items-center justify-center backface-hidden rotate-y-180 box-glow-pink">
+                                    <span id="letterSlot-0" class="text-4xl sm:text-5xl font-black text-white glow-pink">T</span>
+                                    <span id="valueSlot-0" class="text-[10px] text-tokyo-gold font-mono font-bold mt-1">x = 20</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openQuestionModal(0)" id="slotBtn-0" class="mt-3 w-full py-2 px-2 rounded-xl text-xs font-bold bg-tokyo-cyan/20 border border-tokyo-cyan/50 text-tokyo-cyan hover:bg-tokyo-cyan hover:text-tokyo-bg transition flex items-center justify-center gap-1 shadow-md">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span class="btn-text">👁️ Lihat Soalan</span>
+                        </button>
+                    </div>
+
+                    <!-- SLOT 1 -->
+                    <div class="flex flex-col items-center group">
+                        <span class="text-[11px] font-mono font-bold text-slate-400 mb-2" id="labelSlot1">Petak #2</span>
+                        <div onclick="handleDirectSlotClick(1)" id="slotCard-1" class="word-slot perspective-1000 w-20 sm:w-24 h-24 sm:h-28 cursor-pointer">
+                            <div class="flip-card-inner relative w-full h-full transform-style-3d duration-500">
+                                <div id="slotFront-1" class="absolute inset-0 bg-tokyo-bg/90 border-2 border-tokyo-border rounded-2xl flex flex-col items-center justify-center backface-hidden shadow-inner group-hover:border-tokyo-pink transition">
+                                    <span class="text-2xl font-black text-slate-500">?</span>
+                                    <div class="w-12 h-1 mt-2 bg-tokyo-pink rounded-full blank-line"></div>
+                                </div>
+                                <div id="slotBack-1" class="absolute inset-0 bg-gradient-to-b from-tokyo-pink/40 to-purple-900/90 border-2 border-tokyo-pink rounded-2xl flex flex-col items-center justify-center backface-hidden rotate-y-180 box-glow-pink">
+                                    <span id="letterSlot-1" class="text-4xl sm:text-5xl font-black text-white glow-pink">O</span>
+                                    <span id="valueSlot-1" class="text-[10px] text-tokyo-gold font-mono font-bold mt-1">y = 15</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openQuestionModal(1)" id="slotBtn-1" class="mt-3 w-full py-2 px-2 rounded-xl text-xs font-bold bg-tokyo-cyan/20 border border-tokyo-cyan/50 text-tokyo-cyan hover:bg-tokyo-cyan hover:text-tokyo-bg transition flex items-center justify-center gap-1 shadow-md">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span class="btn-text">👁️ Lihat Soalan</span>
+                        </button>
+                    </div>
+
+                    <!-- SLOT 2 -->
+                    <div class="flex flex-col items-center group">
+                        <span class="text-[11px] font-mono font-bold text-slate-400 mb-2" id="labelSlot2">Petak #3</span>
+                        <div onclick="handleDirectSlotClick(2)" id="slotCard-2" class="word-slot perspective-1000 w-20 sm:w-24 h-24 sm:h-28 cursor-pointer">
+                            <div class="flip-card-inner relative w-full h-full transform-style-3d duration-500">
+                                <div id="slotFront-2" class="absolute inset-0 bg-tokyo-bg/90 border-2 border-tokyo-border rounded-2xl flex flex-col items-center justify-center backface-hidden shadow-inner group-hover:border-tokyo-pink transition">
+                                    <span class="text-2xl font-black text-slate-500">?</span>
+                                    <div class="w-12 h-1 mt-2 bg-tokyo-pink rounded-full blank-line"></div>
+                                </div>
+                                <div id="slotBack-2" class="absolute inset-0 bg-gradient-to-b from-tokyo-pink/40 to-purple-900/90 border-2 border-tokyo-pink rounded-2xl flex flex-col items-center justify-center backface-hidden rotate-y-180 box-glow-pink">
+                                    <span id="letterSlot-2" class="text-4xl sm:text-5xl font-black text-white glow-pink">K</span>
+                                    <span id="valueSlot-2" class="text-[10px] text-tokyo-gold font-mono font-bold mt-1">k = 11</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openQuestionModal(2)" id="slotBtn-2" class="mt-3 w-full py-2 px-2 rounded-xl text-xs font-bold bg-tokyo-cyan/20 border border-tokyo-cyan/50 text-tokyo-cyan hover:bg-tokyo-cyan hover:text-tokyo-bg transition flex items-center justify-center gap-1 shadow-md">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span class="btn-text">👁️ Lihat Soalan</span>
+                        </button>
+                    </div>
+
+                    <!-- SLOT 3 -->
+                    <div class="flex flex-col items-center group">
+                        <span class="text-[11px] font-mono font-bold text-slate-400 mb-2" id="labelSlot3">Petak #4</span>
+                        <div onclick="handleDirectSlotClick(3)" id="slotCard-3" class="word-slot perspective-1000 w-20 sm:w-24 h-24 sm:h-28 cursor-pointer">
+                            <div class="flip-card-inner relative w-full h-full transform-style-3d duration-500">
+                                <div id="slotFront-3" class="absolute inset-0 bg-tokyo-bg/90 border-2 border-tokyo-border rounded-2xl flex flex-col items-center justify-center backface-hidden shadow-inner group-hover:border-tokyo-pink transition">
+                                    <span class="text-2xl font-black text-slate-500">?</span>
+                                    <div class="w-12 h-1 mt-2 bg-tokyo-pink rounded-full blank-line"></div>
+                                </div>
+                                <div id="slotBack-3" class="absolute inset-0 bg-gradient-to-b from-tokyo-pink/40 to-purple-900/90 border-2 border-tokyo-pink rounded-2xl flex flex-col items-center justify-center backface-hidden rotate-y-180 box-glow-pink">
+                                    <span id="letterSlot-3" class="text-4xl sm:text-5xl font-black text-white glow-pink">Y</span>
+                                    <span id="valueSlot-3" class="text-[10px] text-tokyo-gold font-mono font-bold mt-1">m = 25</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openQuestionModal(3)" id="slotBtn-3" class="mt-3 w-full py-2 px-2 rounded-xl text-xs font-bold bg-tokyo-cyan/20 border border-tokyo-cyan/50 text-tokyo-cyan hover:bg-tokyo-cyan hover:text-tokyo-bg transition flex items-center justify-center gap-1 shadow-md">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span class="btn-text">👁️ Lihat Soalan</span>
+                        </button>
+                    </div>
+
+                    <!-- SLOT 4 -->
+                    <div class="flex flex-col items-center group col-span-2 sm:col-span-1">
+                        <span class="text-[11px] font-mono font-bold text-slate-400 mb-2" id="labelSlot4">Petak #5</span>
+                        <div onclick="handleDirectSlotClick(4)" id="slotCard-4" class="word-slot perspective-1000 w-20 sm:w-24 h-24 sm:h-28 cursor-pointer">
+                            <div class="flip-card-inner relative w-full h-full transform-style-3d duration-500">
+                                <div id="slotFront-4" class="absolute inset-0 bg-tokyo-bg/90 border-2 border-tokyo-border rounded-2xl flex flex-col items-center justify-center backface-hidden shadow-inner group-hover:border-tokyo-pink transition">
+                                    <span class="text-2xl font-black text-slate-500">?</span>
+                                    <div class="w-12 h-1 mt-2 bg-tokyo-pink rounded-full blank-line"></div>
+                                </div>
+                                <div id="slotBack-4" class="absolute inset-0 bg-gradient-to-b from-tokyo-pink/40 to-purple-900/90 border-2 border-tokyo-pink rounded-2xl flex flex-col items-center justify-center backface-hidden rotate-y-180 box-glow-pink">
+                                    <span id="letterSlot-4" class="text-4xl sm:text-5xl font-black text-white glow-pink">O</span>
+                                    <span id="valueSlot-4" class="text-[10px] text-tokyo-gold font-mono font-bold mt-1">n = 15</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openQuestionModal(4)" id="slotBtn-4" class="mt-3 w-full py-2 px-2 rounded-xl text-xs font-bold bg-tokyo-cyan/20 border border-tokyo-cyan/50 text-tokyo-cyan hover:bg-tokyo-cyan hover:text-tokyo-bg transition flex items-center justify-center gap-1 shadow-md">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span class="btn-text">👁️ Lihat Soalan</span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- PROGRESS BAR -->
+                <div class="max-w-md mx-auto mt-6 pt-4 border-t border-tokyo-border/50">
+                    <div class="flex justify-between text-xs font-mono mb-1.5">
+                        <span class="text-slate-300" id="txtProgressLabel">KEMAJUAN NYAHKOD:</span>
+                        <span id="progressText" class="text-tokyo-cyan font-bold">0 / 5 NYAHKOD</span>
+                    </div>
+                    <div class="w-full bg-tokyo-bg rounded-full h-3 overflow-hidden border border-tokyo-border p-0.5">
+                        <div id="progressBar" class="bg-gradient-to-r from-tokyo-pink via-tokyo-purple to-tokyo-cyan h-full rounded-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DETECTIVE BADGES SECTION WITH PRINT FEATURE -->
+            <section id="badgeSection" class="panel-card p-6">
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                    <h2 class="text-lg font-bold text-tokyo-gold flex items-center gap-2">
+                        <span>🏅</span> <span id="txtBadgeHeading">Fail Lencana Detektif</span>
+                    </h2>
+                    
+                    <div class="flex items-center gap-3">
+                        <span id="badgeProgressText" class="text-xs font-mono text-tokyo-cyan font-bold">Lencana dibuka: 0 / 4</span>
+                        <!-- PDF Print Button -->
+                        <button id="printBtn" onclick="window.print()" class="btn-action text-xs flex items-center gap-1.5 no-print">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            <span id="txtPrintBtn">Cetak PDF</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="badge-grid" id="badgeGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER (LEFT ALIGNED & UPDATED TEXT) -->
+        <footer class="border-t border-tokyo-border/50 py-4 text-left text-xs text-slate-400 font-mono no-print mt-6" id="txtFooter">
+            Koleksi anda disimpan untuk sesi pelayar ini sahaja. Memuat semula halaman akan memulakan penyiasatan baharu.
+        </footer>
+    </div>
+
+
+    <!-- ALPHABET CIPHER CHART DRAWER MODAL -->
+    <div id="cipherDrawerModal" class="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden transition-all no-print">
+        <div class="panel-card border-2 border-tokyo-cyan rounded-3xl p-6 max-w-2xl w-full relative shadow-2xl box-glow-cyan max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-tokyo-border pb-3 mb-4 shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <span>🔤</span> <span id="txtCipherTitle">Carta Kod Huruf (A=1 ... Z=26)</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 font-mono" id="txtCipherSub">Gunakan carta ini untuk menukar nombor kepada huruf</p>
+                </div>
+                <button onclick="closeCipherDrawer()" class="w-8 h-8 rounded-full bg-tokyo-bg border border-tokyo-border text-slate-400 hover:text-white flex items-center justify-center font-mono text-sm transition">
+                    ✕
+                </button>
+            </div>
+            <div class="mb-3 shrink-0">
+                <input type="text" id="cipherSearchInput" oninput="filterCipherGrid()" placeholder="Cari huruf atau nombor..." class="w-full bg-tokyo-bg border border-tokyo-border rounded-xl px-4 py-2 text-xs font-mono text-white focus:outline-none focus:border-tokyo-cyan">
+            </div>
+            <div id="cipherGrid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-7 gap-2 overflow-y-auto pr-1">
+                <!-- JS populated -->
+            </div>
+            <div class="mt-4 pt-3 border-t border-tokyo-border/60 text-center shrink-0">
+                <button onclick="closeCipherDrawer()" class="btn-action btn-cyan text-xs" id="txtCipherCloseBtn">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- DEDICATED ENFORCED TWO-STEP QUESTION MODAL -->
+    <div id="questionModal" class="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden transition-all no-print">
+        <div class="panel-card border-2 border-tokyo-cyan rounded-3xl p-6 sm:p-8 max-w-lg w-full relative shadow-2xl box-glow-cyan overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center border-b border-tokyo-border pb-4 mb-4">
+                <div class="flex items-center space-x-2">
+                    <span id="modalSlotBadge" class="px-2.5 py-1 rounded-md bg-tokyo-cyan/20 text-tokyo-cyan border border-tokyo-cyan/40 text-xs font-mono font-bold">
+                        Petak #1
+                    </span>
+                    <span id="modalStatusBadge" class="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        🔒 Langkah 1 Diperlukan
+                    </span>
+                </div>
+                <button onclick="closeQuestionModal()" class="w-8 h-8 rounded-full bg-tokyo-bg border border-tokyo-border text-slate-400 hover:text-white flex items-center justify-center font-mono text-sm transition">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Question Equation Card -->
+            <div class="bg-tokyo-bg/90 rounded-2xl p-5 border border-tokyo-border text-center mb-5 box-glow-cyan">
+                <p class="text-xs text-slate-400 font-mono mb-1" id="txtMathTitle">
+                    Ayat Matematik Darab (Cari Nilai Anu):
+                </p>
+                <div id="modalEquationText" class="text-2xl sm:text-3xl font-black text-tokyo-gold tracking-wide font-mono py-2">
+                    x × 5 = 100
+                </div>
+            </div>
+
+            <!-- STEP 1: MATH NUMBER INPUT -->
+            <div id="step1Box" class="space-y-3 mb-5">
+                <label class="block text-xs font-mono font-bold text-tokyo-cyan uppercase" id="txtStep1Label">
+                    LANGKAH 1: Selesaikan nilai anu (Nombor)
+                </label>
+                <div class="flex gap-2">
+                    <input type="number" id="mathInput" placeholder="Masukkan nilai anu..." class="flex-grow bg-tokyo-bg border-2 border-tokyo-border rounded-xl px-4 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-tokyo-cyan">
+                    <button onclick="submitStep1Math()" class="btn-action btn-cyan text-xs shrink-0" id="btnCheckNum">
+                        Semak Nilai
+                    </button>
+                </div>
+                <p id="step1Feedback" class="text-xs font-mono min-h-[20px]"></p>
+            </div>
+
+            <!-- STEP 2: LETTER INPUT (LOCKED UNTIL STEP 1 PASSED) -->
+            <div id="step2Box" class="space-y-3 mb-4 opacity-50 pointer-events-none transition-all">
+                <label class="block text-xs font-mono font-bold text-tokyo-pink uppercase flex items-center justify-between">
+                    <span id="txtStep2Label">LANGKAH 2: Tukar nombor kepada Huruf Kod (A=1...Z=26)</span>
+                    <span id="step2LockBadge" class="text-[10px] text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/30">🔒 Terkunci</span>
+                </label>
+                <div class="flex gap-2">
+                    <input type="text" maxlength="1" id="letterInput" placeholder="Masukkan 1 huruf..." class="flex-grow bg-tokyo-bg border-2 border-tokyo-border rounded-xl px-4 py-2.5 text-sm font-mono uppercase text-white focus:outline-none focus:border-tokyo-pink">
+                    <button onclick="submitStep2Letter()" id="btnSubmitStep2" class="btn-action btn-pink text-xs shrink-0">
+                        Nyahkod Huruf
+                    </button>
+                </div>
+                <p id="step2Feedback" class="text-xs font-mono min-h-[20px]"></p>
+            </div>
+
+            <!-- Close Modal Action -->
+            <div class="pt-3 border-t border-tokyo-border/60 flex justify-end">
+                <button onclick="closeQuestionModal()" class="px-4 py-2 rounded-xl bg-tokyo-bg border border-tokyo-border text-slate-300 text-xs hover:text-white" id="txtCancelBtn">
+                    Batal
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+<script>
+    // Game Data & State
+    let currentLang = 'bm';
+    let soundEnabled = true;
+    let activeModalSlot = null;
+
+    const questionsData = [
+        { slot: 0, varName: 'x', equation: 'x × 5 = 100', numAnswer: 20, letterAnswer: 'T' },
+        { slot: 1, varName: 'y', equation: '1 000 × y = 15 000', numAnswer: 15, letterAnswer: 'O' },
+        { slot: 2, varName: 'k', equation: 'k × 10 = 110', numAnswer: 11, letterAnswer: 'K' },
+        { slot: 3, varName: 'm', equation: '2 × m = 50', numAnswer: 25, letterAnswer: 'Y' },
+        { slot: 4, varName: 'n', equation: '100 × n = 1 500', numAnswer: 15, letterAnswer: 'O' }
+    ];
+
+    const slotState = [
+        { solvedStep1: false, solvedStep2: false },
+        { solvedStep1: false, solvedStep2: false },
+        { solvedStep1: false, solvedStep2: false },
+        { solvedStep1: false, solvedStep2: false },
+        { solvedStep1: false, solvedStep2: false }
+    ];
+
+    const badgeList = [
+        { id: 'first', nameBM: 'Pengurai Kod Pertama', nameEN: 'First Codebreaker', icon: '🔎', descBM: 'Nyahkod huruf pertama anda.', descEN: 'Decipher your first secret letter.', test: () => getUnlockedCount() >= 1 },
+        { id: 'half', nameBM: 'Pakar Separuh Jalan', nameEN: 'Halfway Detective', icon: '🧩', descBM: 'Nyahkod 3 petak rahsia.', descEN: 'Decipher 3 secret slots.', test: () => getUnlockedCount() >= 3 },
+        { id: 'master', nameBM: 'Penyiasat Ulung Matematik', nameEN: 'Master Maths Detective', icon: '🏆', descBM: 'Nyahkod kesemua 5 petak rahsia!', descEN: 'Decipher all 5 secret slots!', test: () => getUnlockedCount() >= 5 },
+        { id: 'math', nameBM: 'Pakar Operasi Darab', nameEN: 'Multiplication Expert', icon: '📐', descBM: 'Selesaikan semua 5 soalan anu darab.', descEN: 'Solve all 5 multiplication unknown questions.', test: () => slotState.every(s => s.solvedStep1) }
+    ];
+
+    const translations = {
+        bm: {
+            title: "Penyahkod Rahsia Matematik",
+            subTitle: "Selesaikan nilai anu operasi darab untuk memecahkan kod rahsia!",
+            author: "Dibina oleh DAPHNE TANG LI YUN",
+            langLabel: "🌐 Bahasa:",
+            cipherBtn: "Carta Kod (A=1)",
+            printBtn: "Cetak PDF",
+            resetBtn: "Tetapkan Semula ↻",
+            cipherRuleTag: "📌 PERATURAN KOD HURUF",
+            cipherRuleDetail: "A = 1, B = 2, C = 3, D = 4, E = 5, F = 6 ... sehingga Z = 26",
+            bannerCipher: "Lihat Carta Kod Huruf",
+            ruleTitle: "PERATURAN WAJIB DETEKTIF:",
+            ruleBody: "Anda mesti menyelesaikan soalan nilai anu matematik terlebih dahulu sebelum memasukkan huruf! Meneka huruf secara terus tidak dibenarkan.",
+            caseTitle: "🗂️ KES PERAKAN RAHSIA",
+            mainHeading: "NYAHKOD KOD DESTINASI RAHSIA 5 HURUF",
+            subHeading: 'Tekan "Lihat Soalan" di bawah setiap petak untuk menyelesaikan nilai anu dahulu!',
+            viewBtn: "👁️ Lihat Soalan",
+            solvedBtn: "✅ Selesai",
+            progressLabel: "KEMAJUAN NYAHKOD:",
+            progressText: "NYAHKOD",
+            badgeHeading: "Fail Lencana Detektif",
+            badgeUnlockedLabel: "Lencana dibuka:",
+            footerText: "Koleksi anda disimpan untuk sesi pelayar ini sahaja. Memuat semula halaman akan memulakan penyiasatan baharu.",
+            cipherTitle: "Carta Kod Huruf (A=1 ... Z=26)",
+            cipherSub: "Gunakan carta ini untuk menukar nombor kepada huruf",
+            cipherPlaceholder: "Cari huruf atau nombor...",
+            cipherCloseBtn: "Tutup",
+            mathTitle: "Ayat Matematik Darab (Cari Nilai Anu):",
+            step1Label: "LANGKAH 1: Selesaikan nilai anu (Nombor)",
+            step1Placeholder: "Masukkan nilai anu...",
+            btnCheckNum: "Semak Nilai",
+            step2Label: "LANGKAH 2: Tukar nombor kepada Huruf Kod (A=1...Z=26)",
+            step2Placeholder: "Masukkan 1 huruf...",
+            btnSubmitStep2: "Nyahkod Huruf",
+            cancelBtn: "Batal",
+            toastTitle: "Sila selesaikan soalan matematik terlebih dahulu!",
+            toastSub: "Selesaikan nilai anu sebelum memasukkan huruf.",
+            step1Required: "🔒 Langkah 1 Diperlukan",
+            step1Done: "🔓 Langkah 1 Selesai",
+            lockedBadge: "🔒 Terkunci",
+            unlockedBadge: "🔓 Terbuka",
+            errNum: "❌ Nilai anu belum tepat. Cuba lagi!",
+            succNum: "✅ Syabas! Nilai anu tepat! Sila teruskan ke Langkah 2.",
+            errLetter: "❌ Huruf belum tepat. Gunakan Carta Kod (A=1...Z=26)!",
+            succLetter: "🎉 Tepat sekali! Petak rahsia berjaya dinyahkod!",
+            slotPrefix: "Petak #"
+        },
+        en: {
+            title: "Maths Mystery Codebreaker",
+            subTitle: "Solve the multiplication unknown value to crack the secret code!",
+            author: "Developed by DAPHNE TANG LI YUN",
+            langLabel: "🌐 Language:",
+            cipherBtn: "Cipher Chart (A=1)",
+            printBtn: "Print PDF",
+            resetBtn: "Reset ↻",
+            cipherRuleTag: "📌 CIPHER CODE RULE",
+            cipherRuleDetail: "A = 1, B = 2, C = 3, D = 4, E = 5, F = 6 ... up to Z = 26",
+            bannerCipher: "View Alphabet Cipher Chart",
+            ruleTitle: "MANDATORY DETECTIVE RULE:",
+            ruleBody: "You must solve the mathematical unknown value first before entering the letter! Direct letter guessing is strictly prohibited.",
+            caseTitle: "🗂️ SECRET CODE FILE",
+            mainHeading: "DECIPHER THE SECRET 5-LETTER DESTINATION",
+            subHeading: 'Click "View Question" under each slot to solve the unknown value first!',
+            viewBtn: "👁️ View Question",
+            solvedBtn: "✅ Deciphered",
+            progressLabel: "DECRYPTION PROGRESS:",
+            progressText: "UNLOCKED",
+            badgeHeading: "Detective Badges Case File",
+            badgeUnlockedLabel: "Badges unlocked:",
+            footerText: "Your collection is saved for this browser session only. Refreshing the page starts a new investigation.",
+            cipherTitle: "Alphabet Cipher Key Chart (A=1 ... Z=26)",
+            cipherSub: "Use this chart to convert numbers to letters",
+            cipherPlaceholder: "Search letter or number...",
+            cipherCloseBtn: "Close",
+            mathTitle: "Multiplication Equation (Find Unknown Value):",
+            step1Label: "STEP 1: Solve the unknown value (Number)",
+            step1Placeholder: "Enter unknown value...",
+            btnCheckNum: "Check Value",
+            step2Label: "STEP 2: Convert number to Code Letter (A=1...Z=26)",
+            step2Placeholder: "Enter 1 letter...",
+            btnSubmitStep2: "Decipher Letter",
+            cancelBtn: "Cancel",
+            toastTitle: "Please solve the maths question first!",
+            toastSub: "Solve the unknown value before entering a letter.",
+            step1Required: "🔒 Step 1 Required",
+            step1Done: "🔓 Step 1 Completed",
+            lockedBadge: "🔒 Locked",
+            unlockedBadge: "🔓 Unlocked",
+            errNum: "❌ Incorrect unknown value. Please try again!",
+            succNum: "✅ Splendid! Correct value! Please proceed to Step 2.",
+            errLetter: "❌ Incorrect letter. Use the Cipher Chart (A=1...Z=26)!",
+            succLetter: "🎉 Spot on! The secret slot has been successfully deciphered!",
+            slotPrefix: "Slot #"
+        }
+    };
+
+    function getUnlockedCount() {
+        return slotState.filter(s => s.solvedStep2).length;
+    }
+
+    // Audio Effects
+    function playSound(type) {
+        if (!soundEnabled) return;
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            } else {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            }
+        } catch (e) {}
+    }
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('soundOnIcon').classList.toggle('hidden', !soundEnabled);
+        document.getElementById('soundOffIcon').classList.toggle('hidden', soundEnabled);
+    }
+
+    // Single Language Switcher
+    function switchLanguage(lang) {
+        currentLang = lang;
+        const t = translations[lang];
+
+        document.getElementById('txtMainTitle').textContent = t.title;
+        document.getElementById('txtMainSub').textContent = t.subTitle;
+        document.getElementById('authorTag').textContent = t.author;
+        document.getElementById('txtLangLabel').textContent = t.langLabel;
+        document.getElementById('txtCipherBtn').textContent = t.cipherBtn;
+        document.getElementById('txtPrintBtn').textContent = t.printBtn;
+        document.getElementById('txtResetBtn').textContent = t.resetBtn;
+        document.getElementById('txtCipherRuleTag').textContent = t.cipherRuleTag;
+        document.getElementById('txtCipherRuleDetail').textContent = t.cipherRuleDetail;
+        document.getElementById('txtBannerCipher').textContent = t.bannerCipher;
+        document.getElementById('txtRuleTitle').textContent = t.ruleTitle;
+        document.getElementById('txtRuleBody').textContent = t.ruleBody;
+        document.getElementById('txtCaseTitle').textContent = t.caseTitle;
+        document.getElementById('txtMainHeading').textContent = t.mainHeading;
+        document.getElementById('txtSubHeading').textContent = t.subHeading;
+        document.getElementById('txtProgressLabel').textContent = t.progressLabel;
+        document.getElementById('txtBadgeHeading').textContent = t.badgeHeading;
+        document.getElementById('txtFooter').textContent = t.footerText;
+
+        document.getElementById('txtCipherTitle').textContent = t.cipherTitle;
+        document.getElementById('txtCipherSub').textContent = t.cipherSub;
+        document.getElementById('cipherSearchInput').placeholder = t.cipherPlaceholder;
+        document.getElementById('txtCipherCloseBtn').textContent = t.cipherCloseBtn;
+
+        document.getElementById('txtMathTitle').textContent = t.mathTitle;
+        document.getElementById('txtStep1Label').textContent = t.step1Label;
+        document.getElementById('mathInput').placeholder = t.step1Placeholder;
+        document.getElementById('btnCheckNum').textContent = t.btnCheckNum;
+        document.getElementById('txtStep2Label').textContent = t.step2Label;
+        document.getElementById('letterInput').placeholder = t.step2Placeholder;
+        document.getElementById('btnSubmitStep2').textContent = t.btnSubmitStep2;
+        document.getElementById('txtCancelBtn').textContent = t.cancelBtn;
+
+        document.getElementById('toastTitle').textContent = t.toastTitle;
+        document.getElementById('toastSub').textContent = t.toastSub;
+
+        for (let i = 0; i < 5; i++) {
+            document.getElementById(`labelSlot${i}`).textContent = `${t.slotPrefix}${i + 1}`;
+            const btnText = document.querySelector(`#slotBtn-${i} .btn-text`);
+            if (btnText) {
+                btnText.textContent = slotState[i].solvedStep2 ? t.solvedBtn : t.viewBtn;
+            }
+        }
+        updateProgress();
+        renderBadges();
+    }
+
+    // Shake & Error Notification on Direct Slot Click
+    function handleDirectSlotClick(index) {
+        if (!slotState[index].solvedStep1) {
+            playSound('wrong');
+            const card = document.getElementById(`slotCard-${index}`);
+            card.classList.add('animate-shake');
+            setTimeout(() => card.classList.remove('animate-shake'), 450);
+
+            const toast = document.getElementById('warningToast');
+            toast.classList.remove('opacity-0', '-translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-4');
+            }, 2500);
+        }
+    }
+
+    // Modal Display Functions
+    function openQuestionModal(slotIndex) {
+        activeModalSlot = slotIndex;
+        const q = questionsData[slotIndex];
+        const state = slotState[slotIndex];
+        const t = translations[currentLang];
+
+        document.getElementById('modalSlotBadge').textContent = `${t.slotPrefix}${slotIndex + 1}`;
+        document.getElementById('modalEquationText').textContent = q.equation;
+
+        document.getElementById('mathInput').value = '';
+        document.getElementById('letterInput').value = '';
+        document.getElementById('step1Feedback').textContent = '';
+        document.getElementById('step2Feedback').textContent = '';
+
+        updateModalUI(state);
+        document.getElementById('questionModal').classList.remove('hidden');
+    }
+
+    function closeQuestionModal() {
+        document.getElementById('questionModal').classList.add('hidden');
+        activeModalSlot = null;
+    }
+
+    function updateModalUI(state) {
+        const badge = document.getElementById('modalStatusBadge');
+        const step2Box = document.getElementById('step2Box');
+        const lockBadge = document.getElementById('step2LockBadge');
+        const t = translations[currentLang];
+
+        if (state.solvedStep1) {
+            badge.textContent = t.step1Done;
+            badge.className = "text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+            
+            step2Box.classList.remove('opacity-50', 'pointer-events-none');
+            lockBadge.textContent = t.unlockedBadge;
+            lockBadge.className = "text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/30";
+        } else {
+            badge.textContent = t.step1Required;
+            badge.className = "text-xs font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40";
+
+            step2Box.classList.add('opacity-50', 'pointer-events-none');
+            lockBadge.textContent = t.lockedBadge;
+            lockBadge.className = "text-[10px] text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/30";
+        }
+    }
+
+    // Step 1: Unknown Value Check
+    function submitStep1Math() {
+        if (activeModalSlot === null) return;
+        const q = questionsData[activeModalSlot];
+        const val = parseFloat(document.getElementById('mathInput').value);
+        const fb = document.getElementById('step1Feedback');
+        const t = translations[currentLang];
+
+        if (val === q.numAnswer) {
+            playSound('correct');
+            slotState[activeModalSlot].solvedStep1 = true;
+            fb.textContent = t.succNum;
+            fb.className = "text-xs font-mono text-emerald-400 font-bold";
+            updateModalUI(slotState[activeModalSlot]);
+            renderBadges();
+        } else {
+            playSound('wrong');
+            fb.textContent = t.errNum;
+            fb.className = "text-xs font-mono text-red-400 font-bold";
+        }
+    }
+
+    // Step 2: Letter Decryption
+    function submitStep2Letter() {
+        if (activeModalSlot === null) return;
+        const q = questionsData[activeModalSlot];
+        const inputLetter = document.getElementById('letterInput').value.trim().toUpperCase();
+        const fb = document.getElementById('step2Feedback');
+        const t = translations[currentLang];
+
+        if (inputLetter === q.letterAnswer) {
+            playSound('correct');
+            slotState[activeModalSlot].solvedStep2 = true;
+            fb.textContent = t.succLetter;
+            fb.className = "text-xs font-mono text-emerald-400 font-bold";
+
+            const cardInner = document.querySelector(`#slotCard-${activeModalSlot} .flip-card-inner`);
+            cardInner.classList.add('flipped');
+
+            const btnText = document.querySelector(`#slotBtn-${activeModalSlot} .btn-text`);
+            btnText.textContent = t.solvedBtn;
+
+            updateProgress();
+            renderBadges();
+
+            setTimeout(() => {
+                closeQuestionModal();
+            }, 1000);
+        } else {
+            playSound('wrong');
+            fb.textContent = t.errLetter;
+            fb.className = "text-xs font-mono text-red-400 font-bold";
+        }
+    }
+
+    function updateProgress() {
+        const count = getUnlockedCount();
+        const t = translations[currentLang];
+        document.getElementById('progressText').textContent = `${count} / 5 ${t.progressText}`;
+        document.getElementById('progressBar').style.width = `${(count / 5) * 100}%`;
+    }
+
+    // Render Badges
+    function renderBadges() {
+        const grid = document.getElementById('badgeGrid');
+        const t = translations[currentLang];
+        grid.innerHTML = badgeList.map(b => {
+            const unlocked = b.test();
+            const name = currentLang === 'bm' ? b.nameBM : b.nameEN;
+            const desc = currentLang === 'bm' ? b.descBM : b.descEN;
+            return `
+                <div class="badge-item ${unlocked ? 'unlocked' : 'locked'}">
+                    <div class="text-3xl mb-1">${unlocked ? b.icon : '🔒'}</div>
+                    <div class="text-xs font-extrabold ${unlocked ? 'text-tokyo-gold' : 'text-slate-400'}">${name}</div>
+                    <div class="text-[10px] text-slate-300 mt-1">${unlocked ? desc : (currentLang === 'bm' ? 'Selesaikan kes untuk buka!' : 'Solve cases to unlock!')}</div>
+                </div>
+            `;
+        }).join('');
+
+        const unlockedCount = badgeList.filter(b => b.test()).length;
+        document.getElementById('badgeProgressText').textContent = `${t.badgeUnlockedLabel} ${unlockedCount} / ${badgeList.length}`;
+    }
+
+    // Cipher Drawer Functions
+    function openCipherDrawer() {
+        renderCipherGrid();
+        document.getElementById('cipherDrawerModal').classList.remove('hidden');
+    }
+    function closeCipherDrawer() {
+        document.getElementById('cipherDrawerModal').classList.add('hidden');
+    }
+
+    function renderCipherGrid(filter = '') {
+        const grid = document.getElementById('cipherGrid');
+        grid.innerHTML = '';
+        for (let i = 1; i <= 26; i++) {
+            const letter = String.fromCharCode(64 + i);
+            if (filter && !letter.includes(filter.toUpperCase()) && !i.toString().includes(filter)) continue;
+            
+            grid.innerHTML += `
+                <div class="bg-tokyo-bg/90 border border-tokyo-border rounded-xl p-2 text-center shadow">
+                    <span class="block text-lg font-black text-tokyo-pink glow-pink">${letter}</span>
+                    <span class="block text-xs font-mono text-tokyo-cyan font-bold">${i}</span>
+                </div>
+            `;
+        }
+    }
+
+    function filterCipherGrid() {
+        const val = document.getElementById('cipherSearchInput').value;
+        renderCipherGrid(val);
+    }
+
+    // Reset Game
+    function resetGame() {
+        slotState.forEach(s => { s.solvedStep1 = false; s.solvedStep2 = false; });
+        for (let i = 0; i < 5; i++) {
+            const cardInner = document.querySelector(`#slotCard-${i} .flip-card-inner`);
+            cardInner.classList.remove('flipped');
+            const btnText = document.querySelector(`#slotBtn-${i} .btn-text`);
+            btnText.textContent = translations[currentLang].viewBtn;
+        }
+        updateProgress();
+        renderBadges();
+    }
+
+    // Ambient Particles Canvas Background
+    function initCanvas() {
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const particles = Array.from({ length: 35 }, () => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 2 + 1,
+            color: Math.random() > 0.5 ? '#ff2a85' : '#00f3ff',
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            alpha: Math.random() * 0.5 + 0.2
+        }));
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0) p.x = width;
+                if (p.x > width) p.x = 0;
+                if (p.y < 0) p.y = height;
+                if (p.y > height) p.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    }
+
+    // Initialize Page
+    window.addEventListener('DOMContentLoaded', () => {
+        initCanvas();
+        switchLanguage('bm');
+        renderBadges();
+    });
+</script>
+</body>
+</html>
